@@ -1,9 +1,9 @@
 use super::traits::Hdr;
 use crate::error::{Error, ErrorType};
 use crate::proto::{EthType, Proto};
-use crate::utility::from_ethtype;
+use crate::utility::{from_ethtype, mac_to_string};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct EthHdr {
   pub src_hw_addr: [u8; 6],
   pub dst_hw_addr: [u8; 6],
@@ -128,5 +128,21 @@ impl PartialEq for EthHdr {
     } else {
       false
     }
+  }
+}
+
+impl std::fmt::Debug for EthHdr {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    f.write_str(
+      format!(
+        "Ethernet type: {},
+Source Hardware Address: {},
+Destination Hardware Address: {}",
+        mac_to_string(&self.src_hw_addr),
+        mac_to_string(&self.dst_hw_addr),
+        self.eth_type,
+      )
+      .as_str(),
+    )
   }
 }
