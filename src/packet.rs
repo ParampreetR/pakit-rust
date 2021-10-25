@@ -74,17 +74,29 @@ impl Packet {
     }
   }
 
-  pub fn send_and_recv(&self) -> Vec<u8> {
-    let mut c = MyChannel::from("wlp0s19f2u3").unwrap();
+  pub fn send_and_recv(&self, interface_name: Option<String>) -> Result<Vec<u8>, Error> {
+    let mut c;
+    if interface_name.is_none() {
+      c = MyChannel::new()?;
+    } else {
+      c = MyChannel::from(interface_name.unwrap())?;
+    }
     c.send_packet(&self.buffer);
     let bits = c.recv();
     println!("{:?}", bits);
-    bits
+    Ok(bits)
   }
 
-  // pub fn recv(&self) {
-  //   let mut packet =
-  // }
+  pub fn send(&self, interface_name: Option<String>) -> Result<usize, Error> {
+    let mut c;
+    if interface_name.is_none() {
+      c = MyChannel::new()?;
+    } else {
+      c = MyChannel::from(interface_name.unwrap())?;
+    }
+    c.send_packet(&self.buffer);
+    Ok(self.buffer.len())
+  }
 }
 
 use std::convert::TryInto;
