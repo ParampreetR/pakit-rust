@@ -149,6 +149,6 @@ Destination Hardware Address: {}",
 
 impl std::fmt::Display for EthHdr {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    f.write_str(format!("{:?}", self.create().unwrap()))
+    f.write_str(format!("{:?}", self.create().unwrap()).as_str())
   }
 }

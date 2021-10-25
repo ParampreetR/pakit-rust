@@ -1,5 +1,5 @@
 use crate::error::{Error, ErrorType};
-use crate::proto::{EthType, Proto};
+use crate::proto::EthType;
 
 pub fn parse_ip<T: ToString>(ip_addr: T) -> Result<[u8; 4], Error> {
   let ip_addr = ip_addr.to_string();

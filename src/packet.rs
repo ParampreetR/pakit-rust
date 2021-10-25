@@ -1,4 +1,4 @@
-use crate::error::{Error, ErrorType};
+use crate::error::Error;
 use crate::hdr::*;
 use crate::proto::{EthType, Proto};
 use crate::sock::MyChannel;
@@ -98,9 +98,3 @@ impl Packet {
     Ok(self.buffer.len())
   }
 }
-
-use std::convert::TryInto;
-
-// impl TryInto<Vec<u8>> for Packet {
-//   type Error = Error;
-// }

@@ -2,28 +2,12 @@ use crate::error::*;
 use pnet_datalink::{
   channel, interfaces, Channel, Config, DataLinkReceiver, DataLinkSender, NetworkInterface,
 };
-use socket2::{Domain, Protocol, SockAddr, Socket, Type};
-use std::net::{Ipv4Addr, SocketAddrV4};
 
 pub struct MyChannel {
   rx: Box<dyn DataLinkReceiver>,
   tx: Box<dyn DataLinkSender>,
   interf: NetworkInterface,
 }
-
-// pub fn send_socket() {
-//   let socket = Socket::new(Domain::IPV4, Type::RAW, Some(Protocol::TCP)).unwrap();
-//   socket
-//     .send_to(
-//       &[
-//         255, 255, 255, 255, 255, 255, 20, 167, 43, 156, 28, 11, 255, 250, 222, 173, 190, 239, 0,
-//         114, 101, 97, 108, 116, 101, 107, 95, 108, 111, 111, 112, 98, 97, 99, 107, 95, 100, 101,
-//         116, 101, 99, 116, 95, 112, 97, 99, 107, 101, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//       ],
-//       &SockAddr::from(SocketAddrV4::new(Ipv4Addr::new(192, 168, 1, 100), 10)),
-//     )
-//     .unwrap();
-// }
 
 impl MyChannel {
   pub fn send_packet(&mut self, packet: &[u8]) {

@@ -1,9 +1,8 @@
 #[test]
 fn create_packet() {
   use pakit::hdr::{ArpHdr, EthHdr};
-  use pakit::{proto::Proto, Packet};
-  let mut p = Packet::new();
-  let mut packet = p
+  use pakit::Packet;
+  let mut packet = Packet::new()
     .header(
       ArpHdr::from(
         "aa:aa:aa:aa:aa:aa",
