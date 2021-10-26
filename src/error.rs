@@ -8,6 +8,7 @@ pub enum ErrorType {
   ChannelError,
   InterfaceError,
   UnwrapHeaderError,
+  PcapFileError,
 }
 
 /// This error struct is used in error handling of this library

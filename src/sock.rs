@@ -1,7 +1,9 @@
 use crate::error::*;
+use pcap_file::PcapWriter;
 use pnet_datalink::{
   channel, interfaces, Channel, Config, DataLinkReceiver, DataLinkSender, NetworkInterface,
 };
+use std::{fs::File, time::Instant};
 
 pub struct MyChannel {
   rx: Box<dyn DataLinkReceiver>,
@@ -81,5 +83,59 @@ impl MyChannel {
     }
 
     bits
+  }
+
+  pub fn capture_to_pcap(
+    &mut self,
+    pcap_path: impl ToString,
+    length: Option<usize>,
+  ) -> Result<usize, Error> {
+    let pcap_path = pcap_path.to_string();
+    let pcap = File::create(pcap_path);
+    match pcap {
+      Err(e) => Err(Error::new(e.to_string(), ErrorType::PcapFileError)),
+      Ok(p) => {
+        let mut total_bytes_written = 0;
+        let mut pcap_writter = PcapWriter::new(p).expect("Error writing file");
+        match length {
+          Some(l) => {
+            let time_start = Instant::now();
+
+            for _ in 0..l {
+              println!("{:?}", time_start.elapsed().as_millis());
+              let raw_packet = self.recv();
+
+              pcap_writter
+                .write(
+                  time_start.elapsed().as_secs() as u32,
+                  time_start.elapsed().as_millis() as u32
+                    % ((time_start.elapsed().as_secs() as u32) * 1000),
+                  &raw_packet,
+                  raw_packet.len() as u32,
+                )
+                .unwrap();
+              total_bytes_written += raw_packet.len();
+            }
+            Ok(total_bytes_written)
+          }
+          None => {
+            let raw_packet = self.recv();
+            let time_start = Instant::now();
+
+            loop {
+              pcap_writter
+                .write(
+                  time_start.elapsed().as_secs() as u32,
+                  time_start.elapsed().as_millis() as u32 % time_start.elapsed().as_secs() as u32,
+                  &raw_packet,
+                  raw_packet.len() as u32,
+                )
+                .unwrap();
+              total_bytes_written += raw_packet.len();
+            }
+          }
+        }
+      }
+    }
   }
 }
