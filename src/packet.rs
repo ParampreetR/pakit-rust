@@ -1,7 +1,7 @@
 use crate::error::Error;
 use crate::hdr::*;
 use crate::proto::{EthType, Proto};
-use crate::sock::MyChannel;
+use crate::sock::Channel;
 use std::collections::HashMap;
 
 pub struct Packet {
@@ -77,9 +77,9 @@ impl Packet {
   pub fn send_and_recv(&self, interface_name: Option<String>) -> Result<Vec<u8>, Error> {
     let mut c;
     if interface_name.is_none() {
-      c = MyChannel::new()?;
+      c = Channel::new()?;
     } else {
-      c = MyChannel::from(interface_name.unwrap())?;
+      c = Channel::from(interface_name.unwrap())?;
     }
     c.send_packet(&self.buffer);
     let bits = c.recv();
@@ -90,9 +90,9 @@ impl Packet {
   pub fn send(&self, interface_name: Option<String>) -> Result<usize, Error> {
     let mut c;
     if interface_name.is_none() {
-      c = MyChannel::new()?;
+      c = Channel::new()?;
     } else {
-      c = MyChannel::from(interface_name.unwrap())?;
+      c = Channel::from(interface_name.unwrap())?;
     }
     c.send_packet(&self.buffer);
     Ok(self.buffer.len())

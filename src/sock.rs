@@ -1,17 +1,18 @@
 use crate::error::*;
 use pcap_file::PcapWriter;
 use pnet_datalink::{
-  channel, interfaces, Channel, Config, DataLinkReceiver, DataLinkSender, NetworkInterface,
+  channel, interfaces, Channel as PChannel, Config, DataLinkReceiver, DataLinkSender,
+  NetworkInterface,
 };
 use std::{fs::File, time::Instant};
 
-pub struct MyChannel {
+pub struct Channel {
   rx: Box<dyn DataLinkReceiver>,
   tx: Box<dyn DataLinkSender>,
   interf: NetworkInterface,
 }
 
-impl MyChannel {
+impl Channel {
   pub fn send_packet(&mut self, packet: &[u8]) {
     self.tx.send_to(packet, Some(self.interf.clone()));
   }
@@ -25,8 +26,8 @@ impl MyChannel {
     if let Some(default_interface) = default_interface {
       let my_channel = channel(default_interface, Config::default()).unwrap();
       match my_channel {
-        Channel::Ethernet(tx, rx) => {
-          return Ok(MyChannel {
+        PChannel::Ethernet(tx, rx) => {
+          return Ok(Channel {
             tx: tx,
             rx: rx,
             interf: default_interface.clone(),
@@ -62,8 +63,8 @@ impl MyChannel {
 
     let my_channel = channel(&interf_selected, Config::default()).unwrap();
     match my_channel {
-      Channel::Ethernet(tx, rx) => {
-        return Ok(MyChannel {
+      PChannel::Ethernet(tx, rx) => {
+        return Ok(Channel {
           tx: tx,
           rx: rx,
           interf: interf_selected.clone(),
