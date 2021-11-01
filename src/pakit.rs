@@ -1,15 +1,16 @@
+use crate::dstructs::Packet;
 use crate::error::Error;
 use crate::hdr::*;
 use crate::proto::{EthType, Proto};
 use crate::sock::Channel;
 use std::collections::HashMap;
 
-pub struct Packet {
+pub struct Pakit {
   pub headers: HashMap<u8, Proto>,
   pub buffer: Vec<u8>,
 }
 
-impl Packet {
+impl Pakit {
   pub fn new() -> Self {
     Self {
       headers: HashMap::with_capacity(7),
@@ -26,7 +27,10 @@ impl Packet {
         let arp_hdr = ArpHdr::parse(&bits[14..]);
         pack.headers.insert(3, Proto::Arp(arp_hdr));
       }
-      EthType::IP => {}
+      EthType::IPv4 => {
+        let ipv4_hdr = ArpHdr::parse(&bits[14..]);
+        pack.headers.insert(3, Proto::Arp(ipv4_hdr));
+      }
       EthType::Unknown => {}
     };
 
@@ -37,6 +41,7 @@ impl Packet {
     match hdr.get() {
       Proto::Arp(arp_hdr) => self.headers.insert(3, Proto::Arp(arp_hdr)),
       Proto::Eth(eth_hdr) => self.headers.insert(2, Proto::Eth(eth_hdr)),
+      Proto::IPv4(ipv4_hdr) => self.headers.insert(3, Proto::IPv4(ipv4_hdr)),
       _ => None,
     };
 
@@ -47,6 +52,7 @@ impl Packet {
     match hdr.get() {
       Proto::Arp(arp_hdr) => self.headers.insert(3, Proto::Arp(arp_hdr)),
       Proto::Eth(eth_hdr) => self.headers.insert(2, Proto::Eth(eth_hdr)),
+      Proto::IPv4(ipv4_hdr) => self.headers.insert(3, Proto::IPv4(ipv4_hdr)),
       _ => None,
     };
   }
@@ -68,13 +74,27 @@ impl Packet {
           }
           _ => {}
         },
+        Proto::IPv4(ipv4) => match self.headers.get(&2) {
+          Some(hdr2) => {
+            match hdr2 {
+              Proto::Eth(eth) => {
+                self.buffer = eth.encapsulate(ipv4.clone()).unwrap();
+              }
+              _ => {
+                self.buffer = vec![];
+              }
+            }
+            println!("{:?}", self.buffer)
+          }
+          _ => {} /* Currently in Development */
+        },
         _ => {}
       },
       _ => {}
     }
   }
 
-  pub fn send_and_recv(&self, interface_name: Option<String>) -> Result<Vec<u8>, Error> {
+  pub fn send_and_recv(&self, interface_name: Option<String>) -> Result<Packet, Error> {
     let mut c;
     if interface_name.is_none() {
       c = Channel::new()?;
@@ -84,7 +104,7 @@ impl Packet {
     c.send_packet(&self.buffer);
     let bits = c.recv();
     println!("{:?}", bits);
-    Ok(bits)
+    Ok(bits.into())
   }
 
   pub fn send(&self, interface_name: Option<String>) -> Result<usize, Error> {

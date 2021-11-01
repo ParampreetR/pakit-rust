@@ -88,26 +88,52 @@ impl Binary for Bits {
 impl Into<String> for Bits {
   fn into(self) -> String {
     self.check_error();
-    self.data
+    let mut len = self.data.len() as u8;
+
+    let mut val = String::new();
+    while self.length > len {
+      val.push('0');
+      len += 1;
+    }
+
+    val.push_str(&self.data);
+    val
   }
 }
 
-impl Into<usize> for Bits {
-  fn into(self) -> usize {
+impl Into<u8> for Bits {
+  fn into(self) -> u8 {
     self.check_error();
-    usize::from_str_radix(&self.data, 2).unwrap()
+
+    u8::from_str_radix(&self.data, 2).unwrap()
   }
 }
 
-impl From<usize> for Bits {
-  fn from(val: usize) -> Self {
-    let bin = format!("{:b}", val).to_string();
-    if bin.len() > 64 {
+impl From<Vec<u8>> for Bits {
+  fn from(val: Vec<u8>) -> Self {
+    if val.len() > 64 {
+      panic!("Data too large!");
+    } else {
+      let mut data = String::new();
+      for i in val.clone() {
+        data.push_str(&format!("{:b}", i))
+      }
+      Self {
+        length: val.capacity() as u8,
+        data: data,
+      }
+    }
+  }
+}
+
+impl From<String> for Bits {
+  fn from(val: String) -> Self {
+    if val.len() > 64 {
       panic!("Data too large!");
     } else {
       Self {
         length: 64,
-        data: bin,
+        data: val,
       }
     }
   }

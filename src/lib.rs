@@ -1,8 +1,9 @@
 pub mod error;
 pub mod hdr;
-mod packet;
+mod pakit;
 pub mod proto;
 mod sock;
 pub mod utility;
-pub use packet::*;
+pub use pakit::*;
 pub use sock::*;
+pub mod dstructs;

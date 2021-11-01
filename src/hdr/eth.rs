@@ -73,9 +73,6 @@ impl EthHdr {
       ));
     }
 
-    while encapsulated.len() < self.length() {
-      encapsulated.push(0);
-    }
     Ok(encapsulated)
   }
 

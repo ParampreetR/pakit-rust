@@ -5,14 +5,14 @@ use crate::hdr::*;
 pub enum Proto {
   Arp(ArpHdr),
   Eth(EthHdr),
-  IP,
+  IPv4(IPv4Hdr),
   ICMP,
   Unknown,
 }
 
 pub enum EthType {
   Arp,
-  IP,
+  IPv4,
   Unknown,
 }
 
