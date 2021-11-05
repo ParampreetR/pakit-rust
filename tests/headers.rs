@@ -30,7 +30,7 @@ fn ipv4_create_parse() {
   use pakit::hdr::Hdr;
   use pakit::hdr::{ip_proto, IPv4Hdr};
 
-  let hdr = IPv4Hdr::from("192.168.1.1", "192.168.10.2", ip_proto::TCP);
+  let hdr = IPv4Hdr::from("192.168.1.1", "192.168.10.2", ip_proto::TCP).unwrap();
   let raw_hdrs = hdr.create().unwrap();
   let hdr2 = IPv4Hdr::parse(&raw_hdrs);
   assert_eq!(hdr, hdr2);
