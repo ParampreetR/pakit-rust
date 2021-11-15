@@ -1,18 +1,20 @@
 use super::traits::Hdr;
+use crate::dstructs::{Bits, Packet};
 use crate::error::*;
 use crate::proto::Proto;
 use crate::utility::*;
+use std::convert::TryInto;
 
 pub const REQ: u16 = 1;
 pub const REP: u16 = 2;
 
 #[derive(Clone)]
 pub struct ArpHdr {
-  pub hw_type: u16,
-  pub proto_type: u16,
-  pub hw_addr_len: u8,
-  pub proto_addr_len: u8,
-  pub opr: u16,
+  pub hw_type: Bits,
+  pub proto_type: Bits,
+  pub hw_addr_len: Bits,
+  pub proto_addr_len: Bits,
+  pub opr: Bits,
   pub src_hw_addr: [u8; 6],
   pub src_proto_addr: [u8; 4],
   pub dst_hw_addr: [u8; 6],
@@ -22,11 +24,11 @@ pub struct ArpHdr {
 impl ArpHdr {
   pub fn new() -> Self {
     Self {
-      hw_type: 0,
-      proto_type: 0,
-      hw_addr_len: 0,
-      proto_addr_len: 0,
-      opr: 0,
+      hw_type: Bits::from(0, 16),
+      proto_type: Bits::from(0, 16),
+      hw_addr_len: Bits::from(0, 8),
+      proto_addr_len: Bits::from(0, 8),
+      opr: Bits::from(0, 16),
       src_hw_addr: [0; 6],
       src_proto_addr: [0; 4],
       dst_hw_addr: [0; 6],
@@ -46,11 +48,11 @@ impl ArpHdr {
     let dst_mac = parse_mac(receiver_mac)?;
 
     Ok(Self {
-      hw_type: 1,
-      proto_type: 0x0800,
-      hw_addr_len: 6,
-      proto_addr_len: 4,
-      opr: REQ,
+      hw_type: Bits::from(1, 16),
+      proto_type: Bits::from(0x0800, 16),
+      hw_addr_len: Bits::from(6, 8),
+      proto_addr_len: Bits::from(4, 8),
+      opr: Bits::from(REQ.into(), 16),
       src_hw_addr: src_mac,
       src_proto_addr: src_ip,
       dst_hw_addr: dst_mac,
@@ -59,31 +61,39 @@ impl ArpHdr {
   }
 
   pub fn set_arp_reply(&mut self) {
-    self.opr = REP;
+    self.opr = Bits::from(REP.into(), 16);
   }
 }
 
 impl Hdr for ArpHdr {
   fn parse(bytes: &[u8]) -> Self {
-    let mut src_hw_addr = [0; 6];
-    let mut dst_hw_addr = [0; 6];
-    let mut src_proto_addr = [0; 4];
-    let mut dst_proto_addr = [0; 4];
-    for i in 0..6 {
-      src_hw_addr[i] = bytes[i + 8];
-      dst_hw_addr[i] = bytes[i + 18];
-    }
-    for i in 0..4 {
-      src_proto_addr[i] = bytes[i + 14];
-      dst_proto_addr[i] = bytes[i + 24];
+    /* Experimental Temporary Code
+    Changing soon */
+    let mut byte = Vec::new();
+
+    for b in bytes {
+      byte.push(*b);
     }
 
+    let bytes: Packet = byte.into();
+    /******/
+
+    let src_hw_addr: [u8; 6] = bytes.get_slice(64, 112).try_into().unwrap();
+    let dst_hw_addr: [u8; 6] = bytes.get_slice(144, 192).try_into().unwrap();
+    let src_proto_addr: [u8; 4] = bytes.get_slice(112, 144).try_into().unwrap();
+    let dst_proto_addr: [u8; 4] = bytes.get_slice(192, 224).try_into().unwrap();
+
     Self {
-      hw_type: ((bytes[0] as u16) << 8) + bytes[1] as u16,
-      proto_type: ((bytes[2] as u16) << 8) + bytes[3] as u16,
-      hw_addr_len: bytes[4],
-      proto_addr_len: bytes[5],
-      opr: ((bytes[6] as u16) << 8) + bytes[7] as u16,
+      hw_type: bytes.get_bin_slice(0, 16).into(),
+      //hw_type: ((bytes[0] as u16) << 8) + bytes[1] as u16,
+      proto_type: bytes.get_bin_slice(16, 32).into(),
+      //proto_type: ((bytes[2] as u16) << 8) + bytes[3] as u16,
+      hw_addr_len: bytes.get_bin_slice(32, 40).into(),
+      //hw_addr_len: bytes[4],
+      proto_addr_len: bytes.get_bin_slice(40, 48).into(),
+      //proto_addr_len: bytes[5],
+      opr: bytes.get_bin_slice(48, 64).into(),
+      //opr: ((bytes[6] as u16) << 8) + bytes[7] as u16,
       src_hw_addr: src_hw_addr,
       src_proto_addr: src_proto_addr,
       dst_hw_addr: dst_hw_addr,
@@ -91,15 +101,12 @@ impl Hdr for ArpHdr {
     }
   }
   fn create(&self) -> Result<Vec<u8>, Error> {
-    let mut packet_data: Vec<u8> = Vec::with_capacity(28);
-    packet_data.push(((self.hw_type & 0xff00) >> 8) as u8);
-    packet_data.push((self.hw_type & 0x00ff) as u8);
-    packet_data.push(((self.proto_type & 0xff00) >> 8) as u8);
-    packet_data.push((self.proto_type & 0x00ff) as u8);
-    packet_data.push(self.hw_addr_len);
-    packet_data.push(self.proto_addr_len);
-    packet_data.push(((self.opr & 0xff00) >> 8) as u8);
-    packet_data.push((self.opr & 0x00ff) as u8);
+    let mut packet_data: Packet = Packet::new();
+    packet_data.append(self.hw_type.clone().into());
+    packet_data.append(self.proto_type.clone().into());
+    packet_data.append(self.hw_addr_len.clone().into());
+    packet_data.append(self.proto_addr_len.clone().into());
+    packet_data.append(self.opr.clone().into());
     for i in 0..6 {
       packet_data.push(self.src_hw_addr[i]);
     }
@@ -116,7 +123,7 @@ impl Hdr for ArpHdr {
       packet_data.push(self.dst_proto_addr[i]);
     }
 
-    Ok(packet_data)
+    Ok(packet_data.into())
   }
   fn get(&self) -> Proto {
     Proto::Arp(self.clone())
