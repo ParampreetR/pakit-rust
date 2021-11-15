@@ -1,13 +1,15 @@
 use super::traits::Hdr;
+use crate::dstructs::{Bits, Packet};
 use crate::error::{Error, ErrorType};
 use crate::proto::{EthType, Proto};
 use crate::utility::{from_ethtype, mac_to_string};
+use std::convert::TryInto;
 
 #[derive(Clone)]
 pub struct EthHdr {
   pub src_hw_addr: [u8; 6],
   pub dst_hw_addr: [u8; 6],
-  pub eth_type: u16,
+  pub eth_type: Bits,
 }
 
 impl EthHdr {
@@ -15,7 +17,7 @@ impl EthHdr {
     Self {
       src_hw_addr: [0; 6],
       dst_hw_addr: [0; 6],
-      eth_type: 0,
+      eth_type: Bits::from(0, 16),
     }
   }
 
@@ -43,7 +45,7 @@ impl EthHdr {
       Ok(Self {
         src_hw_addr: src_hw_addr,
         dst_hw_addr: dst_hw_addr,
-        eth_type: eth_type,
+        eth_type: Bits::from(eth_type.into(), 16),
       })
     }
   }
@@ -52,7 +54,7 @@ impl EthHdr {
     Self {
       src_hw_addr: src_addr,
       dst_hw_addr: dst_addr,
-      eth_type: eth_type,
+      eth_type: Bits::from(eth_type.into(), 16),
     }
   }
 
@@ -77,36 +79,42 @@ impl EthHdr {
   }
 
   pub fn get_data_type(&self) -> EthType {
-    from_ethtype(self.eth_type)
+    from_ethtype(u16::from_str_radix(&self.eth_type.to_bits(), 2).unwrap())
   }
 }
 
 impl Hdr for EthHdr {
   fn create(&self) -> Result<Vec<u8>, Error> {
-    let mut data: Vec<u8> = Vec::with_capacity(14);
+    let mut packet_data: Packet = Packet::new();
     for i in 0..6 {
-      data.push(self.dst_hw_addr[i]);
+      packet_data.push(self.dst_hw_addr[i]);
     }
     for i in 0..6 {
-      data.push(self.src_hw_addr[i]);
+      packet_data.push(self.src_hw_addr[i]);
     }
-    data.push(((self.eth_type & 0xff00) >> 8) as u8);
-    data.push((self.eth_type & 0x00ff) as u8);
-    Ok(data)
+    packet_data.append(self.eth_type.clone().into());
+    //data.push(((self.eth_type & 0xff00) >> 8) as u8);
+    Ok(packet_data.into())
   }
 
   fn parse(bytes: &[u8]) -> Self {
-    let mut src_hw_addr = [0; 6];
-    let mut dst_hw_addr = [0; 6];
-    for i in 0..6 {
-      src_hw_addr[i] = bytes[i + 6];
-      dst_hw_addr[i] = bytes[i];
+    /* Experimental Temporary Code
+    Changing soon */
+    let mut byte = Vec::new();
+
+    for b in bytes {
+      byte.push(*b);
     }
-    let eth_type = ((bytes[12] as u16) << 8) + bytes[13] as u16;
+
+    let bytes: Packet = byte.into();
+    /******/
+
+    let src_hw_addr: [u8; 6] = bytes.get_slice(48, 96).try_into().unwrap();
+    let dst_hw_addr: [u8; 6] = bytes.get_slice(0, 48).try_into().unwrap();
     Self {
       src_hw_addr: src_hw_addr,
       dst_hw_addr: dst_hw_addr,
-      eth_type: eth_type,
+      eth_type: bytes.get_bin_slice(96, 112).into(),
     }
   }
 
