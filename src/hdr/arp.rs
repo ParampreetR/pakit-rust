@@ -66,9 +66,9 @@ impl ArpHdr {
 }
 
 impl Hdr for ArpHdr {
-  fn parse(bytes: &[u8]) -> Self {
+  fn parse(bytes: Packet) -> Self {
     /* Experimental Temporary Code
-    Changing soon */
+    Once added
     let mut byte = Vec::new();
 
     for b in bytes {
@@ -76,7 +76,7 @@ impl Hdr for ArpHdr {
     }
 
     let bytes: Packet = byte.into();
-    /******/
+    */
 
     let src_hw_addr: [u8; 6] = bytes.get_slice(64, 112).try_into().unwrap();
     let dst_hw_addr: [u8; 6] = bytes.get_slice(144, 192).try_into().unwrap();
@@ -100,7 +100,7 @@ impl Hdr for ArpHdr {
       dst_proto_addr: dst_proto_addr,
     }
   }
-  fn create(&self) -> Result<Vec<u8>, Error> {
+  fn create(&self) -> Result<Packet, Error> {
     let mut packet_data: Packet = Packet::new();
     packet_data.append(self.hw_type.clone().into());
     packet_data.append(self.proto_type.clone().into());
@@ -179,6 +179,7 @@ Destination Protocol Address: {}",
 
 impl std::fmt::Display for ArpHdr {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    f.write_str(format!("{:?}", self.create().unwrap()).as_str())
+    let packet_vec: Vec<u8> = self.create().unwrap().into();
+    f.write_str(format!("{:?}", packet_vec).as_str())
   }
 }

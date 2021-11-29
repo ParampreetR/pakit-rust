@@ -63,8 +63,8 @@ impl EthHdr {
   }
 
   pub fn encapsulate(&self, data: impl Hdr) -> Result<Vec<u8>, Error> {
-    let mut encapsulated: Vec<u8> = self.create()?;
-    let mut data = data.create()?;
+    let mut encapsulated: Vec<u8> = self.create()?.into();
+    let mut data = data.create()?.into();
 
     encapsulated.append(&mut data);
 
@@ -84,7 +84,7 @@ impl EthHdr {
 }
 
 impl Hdr for EthHdr {
-  fn create(&self) -> Result<Vec<u8>, Error> {
+  fn create(&self) -> Result<Packet, Error> {
     let mut packet_data: Packet = Packet::new();
     for i in 0..6 {
       packet_data.push(self.dst_hw_addr[i]);
@@ -97,9 +97,9 @@ impl Hdr for EthHdr {
     Ok(packet_data.into())
   }
 
-  fn parse(bytes: &[u8]) -> Self {
+  fn parse(bytes: Packet) -> Self {
     /* Experimental Temporary Code
-    Changing soon */
+    Once added
     let mut byte = Vec::new();
 
     for b in bytes {
@@ -107,7 +107,7 @@ impl Hdr for EthHdr {
     }
 
     let bytes: Packet = byte.into();
-    /******/
+    */
 
     let src_hw_addr: [u8; 6] = bytes.get_slice(48, 96).try_into().unwrap();
     let dst_hw_addr: [u8; 6] = bytes.get_slice(0, 48).try_into().unwrap();
@@ -154,6 +154,7 @@ Destination Hardware Address: {}",
 
 impl std::fmt::Display for EthHdr {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    f.write_str(format!("{:?}", self.create().unwrap()).as_str())
+    let packet_vec: Vec<u8> = self.create().unwrap().into();
+    f.write_str(format!("{:?}", packet_vec).as_str())
   }
 }

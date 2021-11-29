@@ -20,15 +20,15 @@ impl Pakit {
 
   pub fn parse(bits: &[u8]) -> Self {
     let mut pack = Self::new();
-    let eth_hdr = EthHdr::parse(&bits[0..14]);
+    let eth_hdr = EthHdr::parse((&bits[0..14]).into());
     pack.headers.insert(2, Proto::Eth(eth_hdr.clone()));
     match eth_hdr.get_data_type() {
       EthType::Arp => {
-        let arp_hdr = ArpHdr::parse(&bits[14..]);
+        let arp_hdr = ArpHdr::parse((&bits[14..]).into());
         pack.headers.insert(3, Proto::Arp(arp_hdr));
       }
       EthType::IPv4 => {
-        let ipv4_hdr = ArpHdr::parse(&bits[14..]);
+        let ipv4_hdr = ArpHdr::parse((&bits[14..]).into());
         pack.headers.insert(3, Proto::Arp(ipv4_hdr));
       }
       EthType::Unknown => {}

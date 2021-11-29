@@ -63,8 +63,8 @@ impl IPv4Hdr {
     })
   }
   pub fn encapsulate(&self, data: impl Hdr) -> Result<Vec<u8>, Error> {
-    let mut encapsulated: Vec<u8> = self.create()?;
-    let mut data = data.create()?;
+    let mut encapsulated: Vec<u8> = self.create()?.into();
+    let mut data: Vec<u8> = data.create()?.into();
 
     encapsulated.append(&mut data);
 
@@ -87,7 +87,7 @@ impl IPv4Hdr {
 }
 
 impl Hdr for IPv4Hdr {
-  fn create(&self) -> Result<Vec<u8>, Error> {
+  fn create(&self) -> Result<Packet, Error> {
     let mut packet_data = Packet::new();
     packet_data.append(self.ver.clone().into());
     packet_data.append(self.ihl.clone().into());
@@ -111,9 +111,9 @@ impl Hdr for IPv4Hdr {
     Ok(packet_data.into())
   }
 
-  fn parse(bytes: &[u8]) -> Self {
+  fn parse(bytes: Packet) -> Self {
     /* Experimental Temporary Code
-    Changing soon */
+    Once added
     let mut byte = Vec::new();
 
     for b in bytes {
@@ -121,7 +121,7 @@ impl Hdr for IPv4Hdr {
     }
 
     let bytes: Packet = byte.into();
-    /******/
+    */
     let src_ip_vec = bytes.get_slice(96, 128);
     let dst_ip_vec = bytes.get_slice(128, 160);
 
@@ -212,6 +212,7 @@ Destination IP Address: {}",
 
 impl std::fmt::Display for IPv4Hdr {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    f.write_str(format!("{:?}", self.create().unwrap()).as_str())
+    let packet_vec: Vec<u8> = self.create().unwrap().into();
+    f.write_str(format!("{:?}", packet_vec).as_str())
   }
 }

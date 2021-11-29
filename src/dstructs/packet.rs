@@ -73,3 +73,13 @@ impl From<Vec<u8>> for Packet {
     p
   }
 }
+
+impl From<&[u8]> for Packet {
+  fn from(array: &[u8]) -> Self {
+    let mut p = Self::new();
+    for elmt in array {
+      p.push(*elmt);
+    }
+    p
+  }
+}
