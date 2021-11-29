@@ -3,14 +3,13 @@ name = "pakit"
 version = "0.0.1"
 edition = "2018"
 authors = ["ParampreetR <raja.rai6789@gmail.com>"]
-description  = "A Packet Manipulation Library"
+description  = "A Library to send manually crafted data frames or packets and read received packets or dataframes"
 repository = "https://github.com/ParampreetR/pakit-rust"
 license = "Apache-2.0"
 keywords = ["packet", "pakit", "manipulation", "tcp", "arp", "testing"]
 categories = ["network-programming"]
 
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 pnet_datalink = "0.28.0"
