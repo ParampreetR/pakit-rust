@@ -38,6 +38,10 @@ impl Bits {
     }
   }
 
+  /// Returns new `Bits` struct
+  ///
+  /// * `data` - value to store in struct.
+  /// * `len`  - size to store `data` in.
   pub fn from(data: usize, len: u8) -> Self {
     let bin = format!("{:b}", data).to_string();
     if bin.len() > len.into() {

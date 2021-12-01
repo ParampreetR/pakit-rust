@@ -5,6 +5,7 @@ use crate::proto::{EthType, Proto};
 use crate::utility::{from_ethtype, mac_to_string};
 use std::convert::TryInto;
 
+/// The internal structure of an Ethernet frame is specified in IEEE 802.3
 #[derive(Clone)]
 pub struct EthHdr {
   pub src_hw_addr: [u8; 6],
@@ -93,22 +94,10 @@ impl Hdr for EthHdr {
       packet_data.push(self.src_hw_addr[i]);
     }
     packet_data.append(self.eth_type.clone().into());
-    //data.push(((self.eth_type & 0xff00) >> 8) as u8);
     Ok(packet_data.into())
   }
 
   fn parse(bytes: Packet) -> Self {
-    /* Experimental Temporary Code
-    Once added
-    let mut byte = Vec::new();
-
-    for b in bytes {
-      byte.push(*b);
-    }
-
-    let bytes: Packet = byte.into();
-    */
-
     let src_hw_addr: [u8; 6] = bytes.get_slice(48, 96).try_into().unwrap();
     let dst_hw_addr: [u8; 6] = bytes.get_slice(0, 48).try_into().unwrap();
     Self {

@@ -112,16 +112,6 @@ impl Hdr for IPv4Hdr {
   }
 
   fn parse(bytes: Packet) -> Self {
-    /* Experimental Temporary Code
-    Once added
-    let mut byte = Vec::new();
-
-    for b in bytes {
-      byte.push(*b);
-    }
-
-    let bytes: Packet = byte.into();
-    */
     let src_ip_vec = bytes.get_slice(96, 128);
     let dst_ip_vec = bytes.get_slice(128, 160);
 

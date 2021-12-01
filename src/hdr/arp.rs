@@ -67,17 +67,6 @@ impl ArpHdr {
 
 impl Hdr for ArpHdr {
   fn parse(bytes: Packet) -> Self {
-    /* Experimental Temporary Code
-    Once added
-    let mut byte = Vec::new();
-
-    for b in bytes {
-      byte.push(*b);
-    }
-
-    let bytes: Packet = byte.into();
-    */
-
     let src_hw_addr: [u8; 6] = bytes.get_slice(64, 112).try_into().unwrap();
     let dst_hw_addr: [u8; 6] = bytes.get_slice(144, 192).try_into().unwrap();
     let src_proto_addr: [u8; 4] = bytes.get_slice(112, 144).try_into().unwrap();
@@ -85,15 +74,10 @@ impl Hdr for ArpHdr {
 
     Self {
       hw_type: bytes.get_bin_slice(0, 16).into(),
-      //hw_type: ((bytes[0] as u16) << 8) + bytes[1] as u16,
       proto_type: bytes.get_bin_slice(16, 32).into(),
-      //proto_type: ((bytes[2] as u16) << 8) + bytes[3] as u16,
       hw_addr_len: bytes.get_bin_slice(32, 40).into(),
-      //hw_addr_len: bytes[4],
       proto_addr_len: bytes.get_bin_slice(40, 48).into(),
-      //proto_addr_len: bytes[5],
       opr: bytes.get_bin_slice(48, 64).into(),
-      //opr: ((bytes[6] as u16) << 8) + bytes[7] as u16,
       src_hw_addr: src_hw_addr,
       src_proto_addr: src_proto_addr,
       dst_hw_addr: dst_hw_addr,

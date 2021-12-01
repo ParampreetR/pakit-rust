@@ -77,7 +77,6 @@ impl Channel {
   pub fn recv(&mut self) -> Vec<u8> {
     let mut bits: Vec<u8> = Vec::new();
     if let Ok(byte) = self.rx.next() {
-      println!("{:?}", byte);
       for bit in byte {
         bits.push(*bit);
       }
