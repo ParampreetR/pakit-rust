@@ -5,6 +5,10 @@ use crate::hdr::Hdr;
 use crate::proto::Proto;
 use crate::utility::{ip_to_string, parse_ip};
 
+#[path = "query/ipv4_query.rs"]
+mod ipv4_query;
+pub use ipv4_query::*;
+
 pub mod ip_proto {
   pub const ICMP: u8 = 0x01;
   pub const TCP: u8 = 0x06;

@@ -5,6 +5,10 @@ use crate::proto::{EthType, Proto};
 use crate::utility::{from_ethtype, mac_to_string};
 use std::convert::TryInto;
 
+#[path = "query/eth_query.rs"]
+mod eth_query;
+pub use eth_query::*;
+
 /// The internal structure of an Ethernet frame is specified in IEEE 802.3
 #[derive(Clone)]
 pub struct EthHdr {

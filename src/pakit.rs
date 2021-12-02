@@ -101,6 +101,7 @@ impl Pakit {
     } else {
       c = Channel::from(interface_name.unwrap())?;
     }
+    //TODO: Check if received raw data is really a response of your send data.
     c.send_packet(&self.buffer);
     let bits = c.recv();
     println!("{:?}", bits);

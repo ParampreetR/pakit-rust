@@ -146,12 +146,9 @@ impl From<String> for Bits {
 impl PartialEq for Bits {
   fn eq(&self, other: &Bits) -> bool {
     self.check_error();
-    if self.length == other.length {
-      if self.data == other.data {
-        true
-      } else {
-        false
-      }
+    // NOTE: Not Checking length field of struct
+    if self.data == other.data {
+      true
     } else {
       false
     }

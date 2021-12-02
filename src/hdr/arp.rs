@@ -5,6 +5,10 @@ use crate::proto::Proto;
 use crate::utility::*;
 use std::convert::TryInto;
 
+#[path = "query/arp_query.rs"]
+mod arp_query;
+pub use arp_query::*;
+
 pub const REQ: u16 = 1;
 pub const REP: u16 = 2;
 
@@ -24,11 +28,11 @@ pub struct ArpHdr {
 impl ArpHdr {
   pub fn new() -> Self {
     Self {
-      hw_type: Bits::from(0, 16),
-      proto_type: Bits::from(0, 16),
-      hw_addr_len: Bits::from(0, 8),
-      proto_addr_len: Bits::from(0, 8),
-      opr: Bits::from(0, 16),
+      hw_type: Bits::from(1, 16),
+      proto_type: Bits::from(0x0800, 16),
+      hw_addr_len: Bits::from(6, 8),
+      proto_addr_len: Bits::from(4, 8),
+      opr: Bits::from(REQ.into(), 16),
       src_hw_addr: [0; 6],
       src_proto_addr: [0; 4],
       dst_hw_addr: [0; 6],

@@ -1,4 +1,5 @@
-pub mod error;
+mod error;
+pub use error::*;
 pub mod hdr;
 mod pakit;
 pub mod proto;

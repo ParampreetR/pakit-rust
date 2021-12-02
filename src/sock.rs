@@ -123,6 +123,7 @@ impl Channel {
             let time_start = Instant::now();
 
             loop {
+              //FIXME: Time written to pcap file is not accurate
               pcap_writter
                 .write(
                   time_start.elapsed().as_secs() as u32,
