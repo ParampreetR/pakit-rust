@@ -1,10 +1,13 @@
 mod error;
 pub use error::*;
 pub mod hdr;
-mod pakit;
+mod pdu;
 pub mod proto;
+mod query;
+pub use query::*;
+pub mod macros;
 mod sock;
 pub mod utility;
-pub use pakit::*;
+pub use pdu::*;
 pub use sock::*;
 pub mod dstructs;

@@ -1,9 +1,9 @@
 use crate::dstructs::Packet;
-use crate::error::Error;
+use crate::error::PaError;
 use crate::proto::Proto;
 
 pub trait Hdr {
-  fn create(&self) -> Result<Packet, Error>;
-  fn parse(bytes: Packet) -> Self;
-  fn get(&self) -> Proto;
+    fn create(&self) -> Result<Packet, PaError>;
+    fn parse(bytes: Packet) -> Self;
+    fn get(&self) -> Proto;
 }

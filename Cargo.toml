@@ -10,7 +10,9 @@ keywords = ["packet", "pakit", "manipulation", "tcp", "arp", "testing"]
 categories = ["network-programming"]
 
 
+[features]
+pcap = ["pcap-file"]
 
 [dependencies]
 pnet_datalink = "0.28.0"
-pcap-file = "1.1.1"
+pcap-file = { version = "1.1.1", optional = true }
